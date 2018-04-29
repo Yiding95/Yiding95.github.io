@@ -17,8 +17,10 @@ layout: default
     </div>
 </header>
 
+<body style="background-color:#000;">
+
 <!-- Main Content -->
-<div class="container">
+<div class="container" style="background-color:rgb(26, 26, 26);">
 	<div class="row">
         {% if site.sidebar == false %}
 <!-- NO SIDEBAR -->
@@ -183,7 +185,7 @@ layout: default
                                 </a>
                             </li>
                             {% endif %}
-                            
+
                         </ul>
                         {% if site.email %}
                             <p>✉️ {{site.email}}</p>
@@ -204,3 +206,5 @@ layout: default
         {% endif %}
 	</div>
 </div>
+
+</body>

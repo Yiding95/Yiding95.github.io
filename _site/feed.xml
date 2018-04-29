@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Yiding Site</title>
+    <description>To jump, to get</description>
+    <link>http://localhost:4000/</link>
+    <atom:link href="http://localhost:4000/feed.xml" rel="self" type="application/rss+xml" />
+    <pubDate>Mon, 30 Apr 2018 01:59:53 +1000</pubDate>
+    <lastBuildDate>Mon, 30 Apr 2018 01:59:53 +1000</lastBuildDate>
+    <generator>Jekyll v3.8.0</generator>
+    
+      <item>
+        <title>iOS噪音计</title>
+        <description>&lt;h1 id=&quot;前言&quot;&gt;前言&lt;/h1&gt;
+
+&lt;p&gt;最近在办公室觉得有点吵，然后忽然想做一个噪音计测试一下噪音，在App Store下载了几款测噪音软件，使用原来都大同小异。于是决定自己实现测噪音的原理。&lt;/p&gt;
+
+&lt;h2 id=&quot;分贝db&quot;&gt;分贝dB&lt;/h2&gt;
+&lt;p&gt;首先要测量噪音，必须知道噪音的大小的参考的单位为分贝（dB），分贝的定义如下：&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;SPL = 20lg[p(e)/p(ref)]
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;p(e)&lt;/code&gt;为待测的有效声压，&lt;code class=&quot;highlighter-rouge&quot;&gt;p(ref)&lt;/code&gt;为参考声压，一般取2*10E-5帕，这是人耳能分辨的最小声压（1KHz）。&lt;/p&gt;
+
+&lt;p&gt;就是说噪音每增加20dB，声压增强了10倍。&lt;/p&gt;
+
+&lt;h2 id=&quot;ios测噪音原理&quot;&gt;iOS测噪音原理&lt;/h2&gt;
+
+&lt;p&gt;iOS设备测量噪音原理非常简单：调用系统麦克风，根据麦克风输入强度计算转化为对应的dB值。但是，实现的过程可是坑满满。&lt;/p&gt;
+
+&lt;p&gt;找到了一篇博客介绍iOS硬件的调用:&lt;a href=&quot;http://www.cnblogs.com/kenshincui/p/4186022.html&quot;&gt;iOS开发系列–音频播放、录音、视频播放、拍照、视频录制&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;iOS的&lt;code class=&quot;highlighter-rouge&quot;&gt;AVFoundation&lt;/code&gt;框架中有一个&lt;code class=&quot;highlighter-rouge&quot;&gt;AVAudioRecorder&lt;/code&gt;类专门处理录音操作，详见&lt;a href=&quot;https://developer.apple.com/reference/avfoundation/1668872-av_foundation_audio_settings_con&quot;&gt;Apple文档&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;在&lt;code class=&quot;highlighter-rouge&quot;&gt;AVAudioRecorder.h&lt;/code&gt;中找到下列方法&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;- (void)updateMeters; /* call to refresh meter values */ 更新麦克风测量值
+- (float)peakPowerForChannel:(NSUInteger)channelNumber; /* returns peak power in decibels for a given channel */ 获取峰值
+- (float)averagePowerForChannel:(NSUInteger)channelNumber; /* returns average power in decibels for a given channel */ 获取平局值
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;- (float)averagePowerForChannel:(NSUInteger)channelNumber;&lt;/code&gt;文档中描述：&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;Return Value&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;The current average power, in decibels, for the sound being recorded. A return value of 0 dB indicates full scale, or maximum power; a return value of -160 dB indicates minimum power (that is, near silence).&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;If the signal provided to the audio recorder exceeds ±full scale, then the return value may exceed 0 (that is, it may enter the positive range).&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;Discussion&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;To obtain a current average power value, you must call the updateMeters method before calling this method.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;也就是说获取的麦克风测量值返回值范围为 &lt;code class=&quot;highlighter-rouge&quot;&gt;-160dB ~ 0dB&lt;/code&gt;,并且注意最后那句话返回值可能超过0。&lt;/p&gt;
+
+&lt;h2 id=&quot;转化公式&quot;&gt;转化公式&lt;/h2&gt;
+
+&lt;p&gt;获取的的测量值为 &lt;code class=&quot;highlighter-rouge&quot;&gt;-160 ~ 0dB&lt;/code&gt; ，如何转化为我们所要的噪音值呢？在网上找了很多资料都没有结果，于是就自己摸索转化公式。&lt;/p&gt;
+
+&lt;p&gt;刚开始想到的是利用分贝计算公式&lt;code class=&quot;highlighter-rouge&quot;&gt;SPL = 20lg[p(e)/p(ref)]&lt;/code&gt;进行计算，后来直接放弃这个方案，因为这是一个对数运算，获取到的值非常稳定，几乎不会波动，与其他的测噪软件所得的分贝值出入太大。&lt;/p&gt;
+
+&lt;p&gt;然后发现有个App在麦克风没有输入时显示-55dB&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;http://ww2.sinaimg.cn/large/7853084cgw1f9u0nu3xv3j205n0a0glq.jpg&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;于是思路就有了。&lt;/p&gt;
+
+&lt;p&gt;其他测噪音软件的量程均为&lt;code class=&quot;highlighter-rouge&quot;&gt;0~110dB&lt;/code&gt;,而我们获取的的测量值为 &lt;code class=&quot;highlighter-rouge&quot;&gt;-160 ~ 0dB&lt;/code&gt;，两者之间差了&lt;code class=&quot;highlighter-rouge&quot;&gt;50dB&lt;/code&gt;，也就是说以麦克风的测量值的&lt;code class=&quot;highlighter-rouge&quot;&gt;-160dB+50dB = -110dB&lt;/code&gt;作为起点，&lt;code class=&quot;highlighter-rouge&quot;&gt;0dB&lt;/code&gt;作为Max值,恰好量程为&lt;code class=&quot;highlighter-rouge&quot;&gt;0~110dB&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;问题看似结束，但是直接以&lt;code class=&quot;highlighter-rouge&quot;&gt;50dB&lt;/code&gt;作为补偿测量结果会偏大。最后选择了分段进行处理，代码如下&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;
+-(void)audioPowerChange{
+    
+    [self.audioRecorder updateMeters];//更新测量值
+    float power = [self.audioRecorder averagePowerForChannel:0];// 均值
+    float powerMax = [self.audioRecorder peakPowerForChannel:0];// 峰值
+    NSLog(@&quot;power = %f, powerMax = %f&quot;,power, powerMax);
+    
+    CGFloat progress = (1.0 / 160.0) * (power + 160.0);
+    
+    // 关键代码
+    power = power + 160  - 50;
+    
+    int dB = 0;
+    if (power &amp;lt; 0.f) {
+        dB = 0;
+    } else if (power &amp;lt; 40.f) {
+        dB = (int)(power * 0.875);
+    } else if (power &amp;lt; 100.f) {
+        dB = (int)(power - 15);
+    } else if (power &amp;lt; 110.f) {
+        dB = (int)(power * 2.5 - 165);
+    } else {
+        dB = 110;
+    }
+    
+    NSLog(@&quot;progress = %f, dB = %d&quot;, progress, dB);
+    self.powerLabel.text = [NSString stringWithFormat:@&quot;%ddB&quot;, dB];
+    [self.audioPowerProgress setProgress:progress];
+
+}
+
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h1 id=&quot;效果&quot;&gt;效果&lt;/h1&gt;
+
+&lt;p&gt;效果如下：&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;http://ww4.sinaimg.cn/large/7853084cgw1f9u1gqgqieg20k00zk7d8.gif&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;h1 id=&quot;下载地址&quot;&gt;下载地址&lt;/h1&gt;
+
+&lt;p&gt;Demo下载地址：&lt;a href=&quot;https://github.com/qiubaiying/Noise-meter-Demo&quot;&gt;Noise-meter-Demo&lt;/a&gt;&lt;/p&gt;
+</description>
+        <pubDate>Tue, 15 Nov 2016 00:00:00 +1100</pubDate>
+        <link>http://localhost:4000/2016/11/15/%E5%8D%9A%E5%AE%A2%E6%96%87%E7%AB%A0%E6%A8%A1%E6%9D%BF/</link>
+        <guid isPermaLink="true">http://localhost:4000/2016/11/15/%E5%8D%9A%E5%AE%A2%E6%96%87%E7%AB%A0%E6%A8%A1%E6%9D%BF/</guid>
+        
+        <category>iOS</category>
+        
+        <category>Demo</category>
+        
+        
+      </item>
+    
+  </channel>
+</rss>
