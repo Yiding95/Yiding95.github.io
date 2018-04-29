@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Material Theme for Jekyll!
 ## DEMO: [code.liquidthink.net](http://www.code.liquidthink.net)
 #### created with React, Redux, React-Router and transpiled with Webpack.
@@ -98,3 +99,7 @@ any site configuration that you want to let React use, put under 'react' in your
 
 ### Contribution
 Want to contribute? Found an issue? Jump right in! I welcome any help I can get, and will work with you to fix any issues.
+=======
+# Yiding95.github.io
+# hi there.
+>>>>>>> 76507ee91c1f1ad67ffcde97dd14c24ef1d2e47f
