@@ -3,11 +3,11 @@ layout: default
 ---
 
 <!-- Page Header -->
-<header class="intro-header" style="background-image: url('{{ site.baseurl }}/{% if page.header-img %}{{ page.header-img }}{% else %}{{ site.header-img }}{% endif %}')">
-    <div class="container">
+<header class="intro-header"  style="background-image: url('{{ site.baseurl }}/{% if page.header-img %}{{ page.header-img }}{% else %}{{ site.header-img }}{% endif %}')">
+    <div class="container" >
         <div class="row">
             <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1 ">
-                <div class="site-heading">
+                <div class="site-heading" style="color:#000;text-shadow: 0 0 10px #00ff00;">
                     <h1>{% if page.title %}{{ page.title }}{% else %}{{ site.title }}{% endif %}</h1>
                     <!--<hr class="small">-->
                     <span class="subheading">{{ page.description }}</span>
@@ -17,36 +17,34 @@ layout: default
     </div>
 </header>
 
-<body style="background-color:#000;">
+<body style="background-color:#000; ">
 
 <!-- Main Content -->
 <div class="container" style="background-color:rgb(26, 26, 26);">
-	<div class="row">
+	<div class="row" >
         {% if site.sidebar == false %}
 <!-- NO SIDEBAR -->
     <!-- PostList Container -->
-            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1 postlist-container">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1 postlist-container" >
                 {{ content }}
             </div>
     <!-- Sidebar Container -->
             <div class="
                 col-lg-8 col-lg-offset-2
                 col-md-10 col-md-offset-1
-                sidebar-container">
+                sidebar-container"  >
 
                 <!-- Featured Tags -->
                 {% if site.featured-tags %}
                 <section>
                     <!-- no hr -->
-                    <h5><a href="{{'/tags/' | prepend: site.baseurl }}">FEATURED TAGS</a></h5>
-                    <div class="tags">
-        				{% for tag in site.tags %}
-                            {% if tag[1].size > {{site.featured-condition-size}} %}
+                    <h5><a href="{{'/tags/' | prepend: site.baseurl }}" >FEATURED TAGS</a></h5>
+                    <div class="tags" >
+
                 				<a href="{{ site.baseurl }}/tags/#{{ tag[0] }}" title="{{ tag[0] }}" rel="{{ tag[1].size }}">
                                     {{ tag[0] }}
                                 </a>
-                            {% endif %}
-        				{% endfor %}
+
         			</div>
                 </section>
                 {% endif %}
@@ -72,7 +70,7 @@ layout: default
                 col-sm-12
                 col-xs-12
                 postlist-container
-            ">
+            "  >
     			{{ content }}
     		</div>
     <!-- Sidebar Container -->
@@ -89,13 +87,11 @@ layout: default
                     <hr class="hidden-sm hidden-xs">
                     <h5><a href="{{'/tags/' | prepend: site.baseurl }}">FEATURED TAGS</a></h5>
                     <div class="tags">
-                        {% for tag in site.tags %}
-                            {% if tag[1].size > {{site.featured-condition-size}} %}
+
                                 <a href="{{ site.baseurl }}/tags/#{{ tag[0] }}" title="{{ tag[0] }}" rel="{{ tag[1].size }}">
                                     {{ tag[0] }}
                                 </a>
-                            {% endif %}
-                        {% endfor %}
+
                     </div>
                 </section>
                 {% endif %}
