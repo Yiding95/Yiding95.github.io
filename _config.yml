@@ -63,7 +63,7 @@ disqus_username: Yiding95
 gitalk:
   enable: true    #是否开启Gitalk评论
   clientID: f2e5692114bd2e7adf08                          #生成的clientID
-  clientSecret: 9f997a5b4a9505cfcfcd1adadaedf64e9b7ac781   #生成的clientSecret
+  clientSecret: 3b189ba7a07a5b500246540701c1e31c29a5794e  #生成的clientSecret
   repo: Yiding95.github.io    #仓库名称
   owner: Yiding95    #github用户名
   admin: Yiding95
